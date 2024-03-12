@@ -374,8 +374,8 @@ ModuleCallbacks::ModuleCallbacks(const std::function<void(ModuleAdapter module_a
     register_module_adapter(register_module_adapter), everest_register(everest_register), init(init), ready(ready) {
 }
 
-ModuleLoader::ModuleLoader(int argc, char* argv[], ModuleCallbacks callbacks) :
-    runtime_settings(nullptr), callbacks(callbacks) {
+ModuleLoader::ModuleLoader(int argc, char* argv[], ModuleCallbacks callbacks, const char* project_name, const char* project_version) :
+    runtime_settings(nullptr), callbacks(callbacks), project_name(project_name), project_version(project_version) {
     if (!this->parse_command_line(argc, argv)) {
         return;
     }
@@ -540,6 +540,7 @@ int ModuleLoader::initialize() {
 
 bool ModuleLoader::parse_command_line(int argc, char* argv[]) {
     po::options_description desc("EVerest");
+    desc.add_options()("version", "Print version and exit");
     desc.add_options()("help,h", "produce help message");
     desc.add_options()("prefix", po::value<std::string>(), "Set main EVerest directory");
     desc.add_options()("module,m", po::value<std::string>(),
@@ -553,6 +554,11 @@ bool ModuleLoader::parse_command_line(int argc, char* argv[]) {
 
     if (vm.count("help") != 0) {
         std::cout << desc << "\n";
+        return false;
+    }
+
+    if (vm.count("version") != 0) {
+        std::cout << argv[0] << " (" << project_name << " " << project_version << ")" << std::endl;
         return false;
     }
 
